@@ -1,42 +1,57 @@
-import React, { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 
-const CoinCounter = () => {
-  const [count, setCount] = useState(0);
+export default function Home() {
+  const [coinCount, setCoinCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Function to add coin (trigger this when coin slot detects a coin)
-  const addCoin = () => {
-    setCount(prev => prev + 1);
+  const fetchCoins = async () => {
+    try {
+      const res = await fetch("/api/data", { cache: "no-store" });
+      const data = await res.json();
+      setCoinCount(data.coinCount);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Reset function
-  const resetCounter = () => {
-    setCount(0);
+  const resetCoins = async () => {
+    setIsLoading(true);
+    try {
+      await fetch("/api/data", { method: "DELETE" });
+      setCoinCount(0);
+    } catch (err) {
+      console.error("Reset error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchCoins();
+    const interval = setInterval(fetchCoins, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
-      <h1 className="text-2xl mb-6 flex items-center gap-2">
-        <span className="text-3xl">💰</span> Coin Counter
-      </h1>
-
-      <div className="text-7xl font-bold text-blue-500 mb-6">{count}</div>
-
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+      <h1 className="text-2xl mb-4">💰 Coin Counter</h1>
+      
+      {isLoading ? (
+        <div className="text-6xl font-bold text-blue-500 animate-pulse">...</div>
+      ) : (
+        <h2 className="text-6xl font-bold text-blue-500">{coinCount}</h2>
+      )}
+      
       <button
-        onClick={resetCounter}
-        className="bg-red-600 hover:bg-red-800 text-white font-bold py-3 px-8 rounded-2xl shadow-md"
+        onClick={resetCoins}
+        disabled={isLoading}
+        className={`mt-6 px-6 py-2 rounded-xl ${isLoading ? 'bg-gray-600' : 'bg-red-600 hover:bg-red-700'}`}
       >
-        Reset
-      </button>
-
-      {/* Test button (remove in production, only for demo) */}
-      <button
-        onClick={addCoin}
-        className="mt-4 bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-6 rounded-2xl shadow-md"
-      >
-        Add Coin
+        {isLoading ? "Processing..." : "Reset"}
       </button>
     </div>
   );
-};
-
-export default CoinCounter;
+}
