@@ -1,57 +1,36 @@
-"use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import "./App.css"; // 👈 Import styles
 
-export default function Home() {
-  const [coinCount, setCoinCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+function App() {
+  const [count, setCount] = useState(0);
 
-  const fetchCoins = async () => {
-    try {
-      const res = await fetch("/api/data", { cache: "no-store" });
-      const data = await res.json();
-      setCoinCount(data.coinCount);
-    } catch (err) {
-      console.error("Fetch error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const resetCoins = async () => {
-    setIsLoading(true);
-    try {
-      await fetch("/api/data", { method: "DELETE" });
-      setCoinCount(0);
-    } catch (err) {
-      console.error("Reset error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Load initial count
   useEffect(() => {
-    fetchCoins();
-    const interval = setInterval(fetchCoins, 2000);
-    return () => clearInterval(interval);
+    fetch("/api/count")
+      .then((res) => res.json())
+      .then((data) => setCount(data.count))
+      .catch((err) => console.error(err));
   }, []);
 
+  // Increment function
+  const handleIncrement = () => {
+    fetch("/api/increment", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => setCount(data.count))
+      .catch((err) => console.error(err));
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
-      <h1 className="text-2xl mb-4">💰 Coin Counter</h1>
-      
-      {isLoading ? (
-        <div className="text-6xl font-bold text-blue-500 animate-pulse">...</div>
-      ) : (
-        <h2 className="text-6xl font-bold text-blue-500">{coinCount}</h2>
-      )}
-      
-      <button
-        onClick={resetCoins}
-        disabled={isLoading}
-        className={`mt-6 px-6 py-2 rounded-xl ${isLoading ? 'bg-gray-600' : 'bg-red-600 hover:bg-red-700'}`}
-      >
-        {isLoading ? "Processing..." : "Reset"}
+    <div className="app-container">
+      <h1 className="app-title">🪙 Coin Counter</h1>
+      <p className="app-count">
+        Current Count: <strong>{count}</strong>
+      </p>
+      <button className="app-button" onClick={handleIncrement}>
+        ➕ Add Coin
       </button>
     </div>
   );
 }
+
+export default App;
