@@ -117,9 +117,11 @@ export default function App() {
               
               {/* Animated Coin Display */}
               <div className={`transition-all duration-500 ${isAnimating ? 'scale-110 rotate-12' : 'scale-100'}`}>
-                <div className="text-7xl font-bold text-white mb-1">
-                  {coinCount.toLocaleString()}
-                </div>
+                {coinCount > 0 && (
+                  <div className="text-7xl font-bold text-white mb-1">
+                    {coinCount.toLocaleString()}
+                  </div>
+                )}
                 <div className="text-white/90 text-sm font-medium">
                   Total Coins Collected
                 </div>
