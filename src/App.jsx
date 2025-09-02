@@ -1,36 +1,54 @@
-import { useEffect, useState } from "react";
-import "./App.css"; // 👈 Import styles
+"use client";
+import { useState, useEffect } from "react";
+import "./index.css"; // <-- make sure it's imported
 
-function App() {
-  const [count, setCount] = useState(0);
+export default function Home() {
+  const [coinCount, setCoinCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load initial count
-  useEffect(() => {
-    fetch("/api/count")
-      .then((res) => res.json())
-      .then((data) => setCount(data.count))
-      .catch((err) => console.error(err));
-  }, []);
-
-  // Increment function
-  const handleIncrement = () => {
-    fetch("/api/increment", { method: "POST" })
-      .then((res) => res.json())
-      .then((data) => setCount(data.count))
-      .catch((err) => console.error(err));
+  const fetchCoins = async () => {
+    try {
+      const res = await fetch("/api/data", { cache: "no-store" });
+      const data = await res.json();
+      setCoinCount(data.coinCount);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  const resetCoins = async () => {
+    setIsLoading(true);
+    try {
+      await fetch("/api/data", { method: "DELETE" });
+      setCoinCount(0);
+    } catch (err) {
+      console.error("Reset error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoins();
+    const interval = setInterval(fetchCoins, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="app-container">
-      <h1 className="app-title">🪙 Coin Counter</h1>
-      <p className="app-count">
-        Current Count: <strong>{count}</strong>
-      </p>
-      <button className="app-button" onClick={handleIncrement}>
-        ➕ Add Coin
+    <div className="container">
+      <h1>💰 Coin Counter</h1>
+
+      {isLoading ? (
+        <p className="counter-value">...</p>
+      ) : (
+        <p className="counter-value">{coinCount}</p>
+      )}
+
+      <button onClick={resetCoins} disabled={isLoading}>
+        {isLoading ? "Processing..." : "Reset"}
       </button>
     </div>
   );
 }
-
-export default App;
