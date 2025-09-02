@@ -17,7 +17,7 @@ export default function App() {
     try {
       const res = await fetch("/api/data", { cache: "no-store" });
       const data = await res.json();
-      setCoinCount(data.coinCount || 0);
+      setCoinCount(data.total || 0);
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
