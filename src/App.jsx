@@ -117,7 +117,7 @@ export default function App() {
               
               {/* Animated Coin Display */}
               <div className={`transition-all duration-500 ${isAnimating ? 'scale-110 rotate-12' : 'scale-100'}`}>
-                <div className="text-5xl font-bold text-white mb-1">
+                <div className="text-7xl font-bold text-white mb-1">
                   {coinCount.toLocaleString()}
                 </div>
                 <div className="text-white/90 text-sm font-medium">
@@ -138,16 +138,12 @@ export default function App() {
 
             {/* Add Coins Section */}
             <div className="space-y-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Add Coins
-              </label>
               <input
                 type="number"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Enter amount and press Enter..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-transparent"
                 disabled={isLoading}
               />
             </div>
@@ -160,7 +156,6 @@ export default function App() {
                 className="py-3 px-6 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
-                Reset
               </button>
             </div>
 
