@@ -1,10 +1,9 @@
-// api/data.js
 let total = 0;
 
 export default async function handler(req, res) {
   // Set CORS headers to allow requests from your frontend
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // Handle OPTIONS request for CORS preflight
@@ -21,7 +20,8 @@ export default async function handler(req, res) {
       console.error('Error in GET handler:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
-  } else if (req.method === 'POST') {
+  } 
+  else if (req.method === 'POST') {
     // Update the total
     try {
       const { coinCount } = req.body;
@@ -48,8 +48,20 @@ export default async function handler(req, res) {
       console.error('Error in POST handler:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
-  } else {
-    res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
-    res.status(405).json({ error: Method ${req.method} Not Allowed });
+  } 
+  else if (req.method === 'DELETE') {
+    // Reset the total
+    try {
+      total = 0;
+      console.log('DELETE request received. Total reset to 0.');
+      res.status(200).json({ message: 'Total reset', total: 0 });
+    } catch (error) {
+      console.error('Error in DELETE handler:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+  else {
+    res.setHeader('Allow', ['GET', 'POST', 'DELETE', 'OPTIONS']);
+    res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
 }

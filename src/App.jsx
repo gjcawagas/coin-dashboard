@@ -5,62 +5,18 @@ import './App.css';
 export default function App() {
   const [coinCount, setCoinCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const [history, setHistory] = useState([]);
 
   // Fetch coins from backend
   const fetchCoins = async () => {
-    setIsLoading(true);
-    setError("");
     try {
       const res = await fetch("/api/data", { cache: "no-store" });
       const data = await res.json();
       setCoinCount(data.total || 0);
     } catch (err) {
       console.error("Fetch error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Add coins with animation
-  const addCoins = async () => {
-    if (!inputValue || isNaN(inputValue) || parseFloat(inputValue) <= 0) {
-      setError("Please enter a valid positive number");
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-    setIsAnimating(true);
-
-    try {
-      const amount = parseFloat(inputValue);
-      const res = await fetch("/api/data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ coinCount: amount }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setCoinCount(data.total);
-        setHistory(prev => [
-          { action: `Added ${amount} coins`, timestamp: new Date(), amount },
-          ...prev.slice(0, 4)
-        ]);
-        setInputValue("");
-      } else {
-        setError("Failed to add coins");
-      }
-    } catch (err) {
-      setError("Error adding coins");
-      console.error("Add coins error:", err);
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => setIsAnimating(false), 500);
     }
   };
 
@@ -82,23 +38,18 @@ export default function App() {
       }
     } catch (err) {
       setError("Error resetting coins");
-      console.error("Reset error:", err);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Load data on component mount
+  // Poll the backend every 2 seconds to get latest coin count
   useEffect(() => {
     fetchCoins();
+    const interval = setInterval(fetchCoins, 2000); // fetch every 2 seconds
+    return () => clearInterval(interval);
   }, []);
-
-  // Handle input key press
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      addCoins();
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex items-center justify-center p-4">
@@ -114,7 +65,7 @@ export default function App() {
                 <h1 className="text-2xl font-bold text-white">Coin Counter</h1>
                 <Sparkles className="w-6 h-6 text-white ml-2" />
               </div>
-              
+
               {/* Animated Coin Display */}
               <div className={`transition-all duration-500 ${isAnimating ? 'scale-110 rotate-12' : 'scale-100'}`}>
                 {coinCount > 0 && (
@@ -137,18 +88,6 @@ export default function App() {
                 {error}
               </div>
             )}
-
-            {/* Add Coins Section */}
-            <div className="space-y-4">
-              <input
-                type="number"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-transparent"
-                disabled={isLoading}
-              />
-            </div>
 
             {/* Reset Button */}
             <div className="flex justify-center">
